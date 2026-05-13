@@ -29,17 +29,21 @@
 // }
 pipeline {
     agent any
+
+    environment {
+        IMAGE_NAME = 'todo-node'
+        IMAGE_TAG  = "${BUILD_NUMBER}"
+    }
+
     stages {
-        stage('Clone') {
-            steps {
-                echo 'Cloning repo...'
-            }
-        }
         stage('Build') {
             steps {
-                echo 'Building...'
+                echo 'Building Docker image...'
+                sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
+                sh "docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest"
             }
         }
+
         stage('Test') {
             steps {
                 echo 'Running tests...'
