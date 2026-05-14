@@ -1,0 +1,26 @@
+name: Docker Image Build and Push
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build the Docker image
+      run: |
+        docker build . --file Dockerfile --tag ${{ secrets.DOCKER_USERNAME }}/todo-image:${{ github.sha }}
+        docker tag ${{ secrets.DOCKER_USERNAME }}/todo-image:${{ github.sha }} ${{ secrets.DOCKER_USERNAME }}/todo-image:latest
+
+    - name: Login and Push image
+      run: |
+        echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+        docker push ${{ secrets.DOCKER_USERNAME }}/todo-image:${{ github.sha }}
+        docker push ${{ secrets.DOCKER_USERNAME }}/todo-image:latest
