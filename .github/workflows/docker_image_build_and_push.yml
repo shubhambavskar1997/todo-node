@@ -24,3 +24,12 @@ jobs:
         echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
         docker push ${{ secrets.DOCKER_USERNAME }}/todo-image:${{ github.sha }}
         docker push ${{ secrets.DOCKER_USERNAME }}/todo-image:latest
+    
+    - name: Update imagetag in manifests
+      run: |
+        sed -i 's|image: shubz007/todo-image:.*|image: shubz007/todo-image:${{ github.sha }}|' k8s/deployment.yaml
+        git config user.name "github-actions"
+        git config user.email "github-actions@github.com"
+        git add k8s/deployment.yaml
+        git commit -m "Update image tag to ${{ github.sha }}"
+        git push
